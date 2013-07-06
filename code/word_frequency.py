@@ -1,12 +1,15 @@
 import os
 import sys
 
+#
+# Compute frequency of search tokens in a search dataset
+# Usage: cat ../data/queries.csv | python word_frequency.py > output.tab
+#
+
 def normalize(inWord):
     return inWord.strip().lower()
     
 if __name__ == "__main__":
-    """Compute frequency of search tokens"""
-    
     #Initialize an empty map to store word and its frequency
     words = {}
     

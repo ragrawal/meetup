@@ -28,3 +28,6 @@ if __name__ == "__main__":
         #else increment frequency
         else:
             last_frequency = last_frequency + freq
+    
+    #don't forget about the last token
+    if last_token: print "%d\t%s" % (last_frequency, last_token)
