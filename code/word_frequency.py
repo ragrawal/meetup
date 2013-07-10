@@ -1,5 +1,6 @@
 import os
 import sys
+import operator
 
 #
 # Compute frequency of search tokens in a search dataset
@@ -27,8 +28,10 @@ if __name__ == "__main__":
             else:
                 words[token]  = 1
 
-    #print search tokens and its frequency 
-    for word in words:
-        print "%s\t%s" % (words[word], word)
+    #sort dictionary by value and print in reverse order
+    sorted_list = sorted(words.iteritems(), key=operator.itemgetter(1))
+    for item in sorted_list[::-1]:
+        print "%d\t%s" % (item[1], item[0])
+    
     
     
