@@ -19,8 +19,10 @@ jar /usr/local/Cellar/hadoop/1.0.4/libexec/contrib/streaming/hadoop-streaming-1.
 -input data/queries \
 -output data/output \
 -mapper "python word_frequency_mapper.py" \
+-combiner "python word_frequency_combiner.py" \
 -reducer "python word_frequency_reducer.py" \
 -file code/word_frequency_mapper.py \
+-file code/word_frequency_combiner.py \
 -file code/word_frequency_reducer.py 
 # -cacheArchive hdfs://hadoop.cluster:9000/user/easyhadoop/lib/easyhadoop.zip#easyhadoop
 
@@ -45,17 +47,7 @@ hadoop jar /usr/local/Cellar/hadoop/1.0.4/libexec/contrib/streaming/hadoop-strea
 -reducer "python Identity.py" \
 -file code/Identity.py
 
-
-#=================================================
-#NOTES ABOUT OPTIONAL CONFIGURATION PARAMETERS
-#=================================================
-
 #-mapper org.apache.hadoop.mapred.lib.IdentityMapper \
 #Reference: http://stackoverflow.com/questions/7576985/hadoop-streaming-example-failed-to-run-type-mismatch-in-key-from-map
 #-reducer org.apache.hadoop.mapred.lib.IdentityReducer
 
-
-#Using something else as key/value separator
-#Reference: http://hadoop.apache.org/docs/stable/streaming.html (section: Customizing How Lines are Split into Key/Value Pairs)
-#-D stream.map.output.field.separator=. \
-#-D stream.num.map.output.key.fields=4 \
