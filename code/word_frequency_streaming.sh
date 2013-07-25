@@ -1,3 +1,7 @@
+#Use the following command to find location of streaming jar
+# find /usr/ -name "*streaming*.jar"
+streaming=/usr/lib/hadoop/contrib/streaming/hadoop-streaming-1.2.0.1.3.0.0-107.jar
+
 #Streaming jobs fails if output directory exists. 
 #Hence remove them first
 hadoop dfs -rmr data/output
@@ -9,7 +13,7 @@ hadoop dfs -rmr data/frequency
 #Reducer -- aggregates keys and sum value
 #
 hadoop \
-jar /usr/local/Cellar/hadoop/1.0.4/libexec/contrib/streaming/hadoop-streaming-1.0.4.jar \
+jar $streaming \
 -D mapred.map.tasks=10 \
 -D mapred.reduce.tasks=10 \
 -D mapred.output.compress=true \
@@ -29,7 +33,7 @@ jar /usr/local/Cellar/hadoop/1.0.4/libexec/contrib/streaming/hadoop-streaming-1.
 # Sorts tokens by frequency in descending order. 
 # 
 
-hadoop jar /usr/local/Cellar/hadoop/1.0.4/libexec/contrib/streaming/hadoop-streaming-1.0.4.jar \
+hadoop jar $streaming \
 -D mapred.output.key.comparator.class=org.apache.hadoop.mapred.lib.KeyFieldBasedComparator \
 -D map.output.key.field.separator=. \
 -D mapred.text.key.comparator.options=-k1,1nr \
