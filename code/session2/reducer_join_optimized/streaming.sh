@@ -36,7 +36,7 @@ hadoop \
 jar $streaming \
 -D mapred.output.key.comparator.class=org.apache.hadoop.mapred.lib.KeyFieldBasedComparator \
 -D map.output.key.field.separator=| \
--D mapred.text.key.comparator.options=-k1,2n \
+-D mapred.text.key.comparator.options=-k1,1 -k2n,2 \
 -D mapred.map.tasks=10 \
 -D mapred.reduce.tasks=1 \
 -D mapred.output.compress=true \
