@@ -4,8 +4,8 @@ streaming=/usr/lib/hadoop/contrib/streaming/hadoop-streaming-1.2.0.1.3.0.0-107.j
 
 #Streaming jobs fails if output directory exists. 
 #Hence remove them first
-hadoop dfs -rmr data/step1
-hadoop dfs -rmr data/step2
+hadoop dfs -rmr data/movies/step1
+hadoop dfs -rmr data/movies/step2
 
 #
 #1. MapReduce Job
