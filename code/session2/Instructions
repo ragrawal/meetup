@@ -6,3 +6,11 @@ hadoop dfs -mkdir data/movies/rating
 hadoop dfs -mkdir data/movies/user
 hadoop dfs -copyFromLocal u.data data/movies/rating/
 hadoop dfs -copyFromLocal u.user data/movies/user/
+
+hadoop dfs -text data/movies/rating/* | more
+hadoop dfs -text data/movies/user/* | more
+
+./code/session2/reducer_join/streaming.sh
+hadoop dfs -text data/movies/step2/*
+#M	74260
+#F	25740

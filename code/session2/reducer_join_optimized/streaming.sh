@@ -24,8 +24,8 @@ jar $streaming \
 -output data/movies/step1 \
 -mapper "python step1_mapper.py" \
 -reducer "python step1_reducer.py" \
--file code/session2/reducer_join/step1_mapper.py \
--file code/session2/reducer_join/step1_reducer.py 
+-file code/session2/reducer_join_optimized/step1_mapper.py \
+-file code/session2/reducer_join_optimized/step1_reducer.py 
 
 #
 # 2. Map Reduce
@@ -34,6 +34,9 @@ jar $streaming \
 
 hadoop \
 jar $streaming \
+-D mapred.output.key.comparator.class=org.apache.hadoop.mapred.lib.KeyFieldBasedComparator \
+-D map.output.key.field.separator=| \
+-D mapred.text.key.comparator.options=-k1,2n \
 -D mapred.map.tasks=10 \
 -D mapred.reduce.tasks=1 \
 -D mapred.output.compress=true \
