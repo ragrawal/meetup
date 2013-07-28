@@ -1,0 +1,8 @@
+scp -P 2222 u.data hue@127.0.0.1:.
+scp -P 2222 u.user hue@127.0.0.1:.
+ssh -p 2222 hue@127.0.0.1
+hadoop dfs -rmr data/movies/
+hadoop dfs -mkdir data/movies/rating
+hadoop dfs -mkdir data/movies/user
+hadoop dfs -copyFromLocal u.data data/movies/rating/
+hadoop dfs -copyFromLocal u.user data/movies/user/
