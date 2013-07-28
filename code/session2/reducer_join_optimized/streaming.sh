@@ -15,6 +15,11 @@ hadoop \
 jar $streaming \
 -D mapred.map.tasks=2 \
 -D mapred.reduce.tasks=2 \
+-D map.output.key.field.separator='|' \
+-D stream.num.map.output.key.fields=2 \
+-D mapred.text.key.partitioner.options="-k1,1" \
+-D mapred.output.key.comparator.class=org.apache.hadoop.mapred.lib.KeyFieldBasedComparator \
+-D mapred.text.key.comparator.options="-k1,1 -k2n,2" \
 -D mapred.output.compress=true \
 -D stream.recordreader.compression=gzip \
 -D mapred.output.compression.codec=org.apache.hadoop.io.compress.GzipCodec \
@@ -34,14 +39,9 @@ jar $streaming \
 
 hadoop \
 jar $streaming \
--D mapred.output.key.comparator.class=org.apache.hadoop.mapred.lib.KeyFieldBasedComparator \
--D map.output.key.field.separator='|' \
--D mapred.text.key.comparator.options="-k1,1 -k2n,2" \
 -D mapred.map.tasks=10 \
 -D mapred.reduce.tasks=1 \
 -D mapred.output.compress=true \
--D stream.recordreader.compression=gzip \
--D mapred.output.compression.codec=org.apache.hadoop.io.compress.GzipCodec \
 -D mapred.task.timeout=1800000 \
 -input data/movies/step1 \
 -output data/movies/step2 \

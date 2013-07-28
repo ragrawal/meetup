@@ -1,8 +1,11 @@
 import os
 import sys
+import logging
 
 last_user = None
 last_gender = None
+
+
 
 def output(value):
     if not last_user or not last_gender: return

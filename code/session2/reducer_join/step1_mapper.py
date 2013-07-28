@@ -8,10 +8,10 @@ for line in sys.stdin:
     if "rating" in filepath:
         #PRINT USER_ID  ITEM_ID
         tokens = line.split("\t")
-        print "%s\tRATING\t%s" % (int(tokens[0]), int(tokens[1]))
+        print "%d\tRATING\t%d" % (int(tokens[0]), int(tokens[1]))
     elif "user" in filepath:
         tokens = line.split("|")
-        print "%s\tUSER\t%s" % (int(tokens[0]), tokens[2].strip())
+        print "%d\tUSER\t%s" % (int(tokens[0]), tokens[2].strip())
     
     
         

@@ -6,12 +6,12 @@ filepath = os.environ["map_input_file"].split('/')
 
 for line in sys.stdin:
     if "rating" in filepath:
-        tokens = line.split("\t")
         #PRINT USER_ID  ITEM_ID
-        print "%s|1\t%s" % (int(tokens[0]), int(tokens[1]))
+        tokens = line.split("\t")
+        print "%d|1\t%d" % (int(tokens[0]), int(tokens[1]))
     elif "user" in filepath:
-        tokens = line.split('|')
-        print "%s|0\t%s" % (int(tokens[0]), tokens[2].strip())
+        tokens = line.split("|")
+        print "%d|0\t%s" % (int(tokens[0]), tokens[2].strip())
     
     
         
