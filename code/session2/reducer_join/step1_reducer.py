@@ -21,7 +21,7 @@ for line in sys.stdin:
         
     if record == "USER":
         last_gender = value
-    else if record == "RATING":
+    elif record == "RATING":
         rated_movies.append(value)
 
 #print last user

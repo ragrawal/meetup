@@ -4,8 +4,8 @@ streaming=/usr/lib/hadoop/contrib/streaming/hadoop-streaming-1.2.0.1.3.0.0-107.j
 
 #Streaming jobs fails if output directory exists. 
 #Hence remove them first
-hadoop dfs -rmr data/output
-hadoop dfs -rmr data/frequency
+hadoop dfs -rmr data/step1
+hadoop dfs -rmr data/step2
 
 #
 #1. MapReduce Job
@@ -20,7 +20,7 @@ jar $streaming \
 -D mapred.output.compression.codec=org.apache.hadoop.io.compress.GzipCodec \
 -D mapred.task.timeout=1800000 \
 -input data/movies/rating \
--input data/movies/user
+-input data/movies/user \
 -output data/movies/step1 \
 -mapper "python step1_mapper.py" \
 -reducer "python step1_reducer.py" \
@@ -32,7 +32,8 @@ jar $streaming \
 # Sorts tokens by gender and count 
 # 
 
-hadoop jar $streaming \
+hadoop \
+jar $streaming \
 -D mapred.output.key.comparator.class=org.apache.hadoop.mapred.lib.KeyFieldBasedComparator \
 -D map.output.key.field.separator=. \
 -D mapred.text.key.comparator.options=-k1,1nr \
