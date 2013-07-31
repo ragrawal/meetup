@@ -1,3 +1,4 @@
+
 scp -P 2222 u.data hue@127.0.0.1:.
 scp -P 2222 u.user hue@127.0.0.1:.
 ssh -p 2222 hue@127.0.0.1
@@ -14,3 +15,7 @@ hadoop dfs -text data/movies/user/* | more
 hadoop dfs -text data/movies/step2/*
 #M	74260
 #F	25740
+
+./code/session2/reducer_join_optimized/streaming.sh
+F	25740
+M	74260
