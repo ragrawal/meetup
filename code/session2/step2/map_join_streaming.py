@@ -27,7 +27,7 @@ jar $streaming \
 #
 hadoop \
 jar $streaming \
--files hdfs://sandbox:8020/user/hue/data/movies/u.item#movieinfo
+-files hdfs://sandbox:8020/user/hue/data/movies/item/u.item#movieinfo
 -D mapred.map.tasks=2 \
 -input data/frequency \
 -output data/output \
