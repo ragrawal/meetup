@@ -25,7 +25,6 @@ class CountItems(object):
 
 
 
-
 if __name__ == '__main__':
     #Replicating single reducer logic
     ci = CountItems()
