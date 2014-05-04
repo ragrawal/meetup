@@ -1,6 +1,7 @@
 #Store this in a file called myudfs.py
 import operator
 
+@outputSchema("records:{t:(age:int, cnt:int)}")
 def Mode(input):
     """Returns modal values and count"""
 
