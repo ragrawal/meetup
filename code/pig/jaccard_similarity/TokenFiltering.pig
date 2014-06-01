@@ -8,53 +8,37 @@
 --
 --
 
-DEFINE JaccardSimilarityTokenFilter(inputData)
-RETURNS outData
-{
-	--
-	-- STEP1: Redefine column names of input data
-	--
-	data = FOREACH $inputData GENERATE 
-				$0 AS id1,
-				$1 AS token;
-	--
-	-- STEP 2: Calculate Number of Tokens Per ID
-	--
-	tblTokenCount = FOREACH (GROUP data by id1) GENERATE
-						group as id,0
-						COUNT($1) AS size;
+-- Load Dataset 
+tbl = LOAD 'data/movies/rating/u.data' using PigStorage('\t') as (user_id:int, item_id:int, rating:int, timestamp:long);
+dataDup = FOREACH tbl GENERATE user_id as user_id, item_id as item_id;
+dataA = DISTINCT dataDup;
 
-	--
-	-- STEP 3: Self join on token. 
-	--
-	tblB = FOREACH data GENERATE 
-				id1 as id2, 
-				token as token;
+-- Calculate Number of users per item
+userCntPerItem = FOREACH (GROUP dataA by item_id) GENERATE 
+						group as item_id,
+						(float) COUNT(dataA) as size;
 
-	jn =  JOIN data by (token), tblB by (token);
-	flt = FILTER jn BY id1 > id2; -- remove duplicate pairs and self join
+-- Self join on user so that we only compare those items that share one or more users
+dataB = FOREACH dataA GENERATE 
+			item_id as item_id,
+			user_id as user_id;
+jn = JOIN dataA by (user_id), dataB by (user_id);
+flt = FILTER jn by dataA::item_id < dataB::item_id;
+overlap = FOREACH (GROUP flt BY (dataA::item_id, dataB::item_id)) GENERATE 
+				FLATTEN(group) as (item_id1, item_id2),
+				(float) COUNT(flt) as intersect;
 
-	tblOverlap = FOREACH (GROUP flt by (id1, id2)) GENERATE 
-					flatten(group) as (id1, id2),
-					COUNT($1) as overlap;
+-- Jaccard Similarity = intersect / (size(A) + size(B) - intersect)					
+-- hence join overlap with userCntPerItem twice. Once for A and once for B
+jn1 = JOIN overlap by item_id1, userCntPerItem by item_id using 'replicated';
+jn2 = JOIN jn1 by item_id2, userCntPerItem by item_id using 'replicated';
 
-	-- 
-	-- STEP 4: Compute jaccard similarity. In order to compute jaccard similarity,
-	-- first get number of tokens for id1 and id2 by joinint tblOverlap to tblTokenCount based on id1 
-	-- and id2. Finally jaccard similarity can be calculated as follows
-	-- J(A,B) = Overlap(A,B)/ (Size(A) + Size(B) - Overlap(A,B))
-	--
-	jn1 = JOIN tblOverlap by id1, tblTokenCount by id;
-	jn2 = JOIN jn1 by id2, tblTokenCount by id;
+jaccard = FOREACH jn2 GENERATE 
+					item_id1 as item_id1,
+					item_id2 as item_id2,
+					intersect/(jn1::userCntPerItem::size + userCntPerItem::size - intersect) as similarity;
 
-	$outData = FOREACH jn2 {
-					id1_size = jn1::tblTokenCount::size;
-					id2_size = tblTokenCount::size;
-					similarity = ((float) overlap) / (id1_size + id2_size - overlap);
-					GENERATE 
-						id1 as id1,
-						id2 as id2,
-						similarity as similarity;
-				}
+store jaccard into 'data/movies/similarity/token' using PigStorage(',');
+                                                                                                                                                              
 
-};
+

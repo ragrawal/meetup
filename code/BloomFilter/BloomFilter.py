@@ -15,8 +15,14 @@ class BloomFilter(object):
 
     def indexes(self, item):
         """Return Hash indexes for the given item"""
-
-        return [int(mmh3.hash(str(item) + str(i)) % self._m) for i in range(self._k)]
+        values = []
+        for i in range(self._k):
+            itemStr = str(item) + str(i)
+            value = mmh3.hash(itemStr) % self._m
+            values.append(value)
+        return values
+        #return [int(mmh3.hash(str(item) + str(i)) 
+        # % self._m) for i in range(self._k)]
 
     @property
     def count(self):
@@ -63,7 +69,7 @@ class VectorBasedBloomFilter(BloomFilter):
 
     def contains(self, item):
         for idx in self.indexes(item): 
-            if self._cointainer[idx] == 0: 
+            if self._container[idx] == 0: 
                 return  False
         return True
 
@@ -118,23 +124,54 @@ class BitSetBasedBloomFilter(BloomFilter):
         return sum([1 for x in bin(self._container)[3:] if int(x)==1])
 
 
+# class CountingBloomFilter(object):
+#     def __init__(self, *args, **kwargs):
+#         super(CountingBloomFilter, self).__init__(*args, **kwargs)
+
+#         # build two dimensional structure for counting bloom filter
+#         self._container = [[0] * self._m] * self._k   
+
+#     def add(self, item):
+#         for hashIdx, hashVal in enumerate(self.indexes(item)):
+#             self._container[hashIdx][hashVal] += 1
+
+#     def delete(self, item):
+#         for hashIdx, hashVal in enumerate(self.indexes(item)):
+#             if self._container[hashIdx][hashVal] > 0:
+#                 self._container[hashIdx][hashVal] -= 1        
+
+#     def item_count(self, item):
+#         cnts = []
+#         for hashIdx, hashVal in enumerate(self.indexes(item)):
+#             cnts.append(self._container[hashIdx][hashVal])
+#         return min(cnts)
+
+#     @property
+#     def count(self):
+
+
+
+
 
 if __name__ == '__main__':
     bf1 = VectorBasedBloomFilter(fp=1E-4, n=10)
     bf1.add(2)
     bf1.add(6)
     bf1.add(3)
+    bf1.add(2)
+    print bf1.contains(3)
+    print bf1.contains(10)
     print bf1.count
 
-    bf2 = VectorBasedBloomFilter(fp=1E-4, n=10)
-    bf2.add(5)
-    bf2.add(10)
-    bf2.add(2)
-    bf2.add(3)
-    print bf2.count
+    # bf2 = VectorBasedBloomFilter(fp=1E-4, n=10)
+    # bf2.add(5)
+    # bf2.add(10)
+    # bf2.add(2)
+    # bf2.add(3)
+    # print bf2.count
 
-    bf3 = VectorBasedBloomFilter(fp=1E-4, n=10)
-    bf3.merge(bf1)
-    bf3.merge(bf2)
-    print bf3.count
+    # bf3 = VectorBasedBloomFilter(fp=1E-4, n=10)
+    # bf3.merge(bf1)
+    # bf3.merge(bf2)
+    # print bf3.count
 
