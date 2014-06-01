@@ -13,9 +13,9 @@
 --     jaccard similarity less than of minimum threshold
 --
 --
---set pig.exec.nocombiner true;
+set pig.exec.nocombiner true;
 
-register 'datafu-1.2.0.jar';
+REGISTER 'datafu-1.2.0.jar';
 DEFINE Enumerate datafu.pig.bags.Enumerate();
 
 
@@ -49,19 +49,18 @@ data = FOREACH (JOIN data BY user_id, tblTokenIndex BY user_id) GENERATE
 				item_id as item_id,
 				user_idx as user_idx;
 
-
 --
 -- Compute prefix length and get top n prefixes
 -- Copy prefixes in two tables for self join
 -- Prefix length = |A| - \tau * |A| + 1
 --
 IdDescription = FOREACH (GROUP data BY item_id) {
-			user_cnt = (float) COUNT(data);
-			prefix_size = (int)(user_cnt - $threshold * user_cnt + 1.0);
+			user_cnt = COUNT(data);
+			prefix_size = (int)((1.0-$threshold)*user_cnt + 1.0);
 			prefix = TOP(prefix_size, 1, $1);
 			GENERATE
 				group as item_id,
-				user_cnt as size,
+				(float)user_cnt as size,
 				prefix.$1 as prefix;
 		}
 
