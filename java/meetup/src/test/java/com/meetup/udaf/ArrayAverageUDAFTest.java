@@ -55,14 +55,15 @@ public class ArrayAverageUDAFTest extends TestCase {
 		
 		//On the reducer side the three evaluator will be joined together
 		//by calling terminatePartial and merge
-		for(int i=1; i<numMapper; i++){
-			evaluator[i].merge(evaluator[i-1].terminatePartial());
+		ArrayAverageUDAF.AverageUDAFEvaluator finalEval = new ArrayAverageUDAF.AverageUDAFEvaluator();
+		for(int i=0; i<numMapper; i++){
+			finalEval.merge(evaluator[i].terminatePartial());
 		}
 		
 		//finally grab the final result
-		ArrayList<Double> result = (ArrayList<Double>) evaluator[numMapper-1].terminate();
+		ArrayList<Double> result = (ArrayList<Double>) finalEval.terminate();
 		
-		//assertEquals(22.0, result.get(0));
+		assertEquals(22.0, result.get(0));
 		 
 	}
 }
