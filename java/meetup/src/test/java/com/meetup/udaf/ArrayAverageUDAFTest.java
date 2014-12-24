@@ -14,18 +14,32 @@ public class ArrayAverageUDAFTest extends TestCase {
 		
 		ArrayList<Double> d = new ArrayList<Double>();
 		d.add(11.0);
+		d.add(12.0);
+		list.add(d);
 		
 		ArrayList<Double> e = new ArrayList<Double>();
-		e.add(11.0);
+		e.add(13.0);
+		e.add(15.0);
+		list.add((ArrayList<Double>) e.clone());
 		
-		list.add(d);
-		list.add(e);
+		e = new ArrayList<Double>();
+		e.add(12.0);
+		e.add(12.0);
+		list.add((ArrayList<Double>)e.clone());
+		
+		e = new ArrayList<Double>();
+		e.add(13.0);
+		e.add(12.0);
+		list.add((ArrayList<Double>)e.clone());
+		
+		
+		
 		return list;
 		
 		
 	}
 	
-	public void Reducer() throws HiveException{
+	public void testReducer() throws HiveException{
 		ArrayList<ArrayList<Double>> values = getRows();
 		
 		ArrayAverageUDAF.AverageUDAFEvaluator evaluator = new ArrayAverageUDAF.AverageUDAFEvaluator();
@@ -33,7 +47,7 @@ public class ArrayAverageUDAFTest extends TestCase {
 			evaluator.iterate(d);
 		}
 		ArrayList<Double> result = (ArrayList<Double>) evaluator.terminate();
-		//assertEquals(22.0, result.get(0));
+		assertEquals(12.25, result.get(0));
 	}
 	
 	public void testCombiner() throws HiveException{
@@ -55,14 +69,15 @@ public class ArrayAverageUDAFTest extends TestCase {
 		
 		//On the reducer side the three evaluator will be joined together
 		//by calling terminatePartial and merge
-		for(int i=1; i<numMapper; i++){
-			evaluator[i].merge(evaluator[i-1].terminatePartial());
+		ArrayAverageUDAF.AverageUDAFEvaluator finalEval = new ArrayAverageUDAF.AverageUDAFEvaluator();
+		for(int i=0; i<numMapper; i++){
+			finalEval.merge(evaluator[i].terminatePartial());
 		}
 		
 		//finally grab the final result
-		ArrayList<Double> result = (ArrayList<Double>) evaluator[numMapper-1].terminate();
+		ArrayList<Double> result = (ArrayList<Double>) finalEval.terminate();
 		
-		//assertEquals(22.0, result.get(0));
+		assertEquals(12.25, result.get(0));
 		 
 	}
 }

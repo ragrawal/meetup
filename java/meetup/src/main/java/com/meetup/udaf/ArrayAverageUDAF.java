@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hive.ql.exec.Description;
@@ -17,20 +18,61 @@ import org.apache.hadoop.hive.ql.metadata.HiveException;
         value = "_FUNC_(array<double>) - Computes mean",
         extended = "select attr1, CustomAverage(value) from tbl group by attr1;"
 )
+
 public class ArrayAverageUDAF extends UDAF{
     static final Log LOG = LogFactory.getLog(ArrayAverageUDAF.class.getName());
     
-    
-    
     public static class AverageUDAFEvaluator implements UDAFEvaluator{
-
     	
         /**
          * Use item class to serialize intermediate computation
          */
         public static class Item{
-            ArrayList<Double> total_value = new ArrayList<Double>();
-            int cnt = 0;
+            ArrayList<Double> total_value = null;
+            int rows = 0;
+            
+            //no argument constructor 
+            //--required so that hive can serialize and deserialize item
+            public Item() {}
+            
+            //constructor
+            public void reset(int cols) {
+            	total_value = new ArrayList<Double>(cols);
+            	for(int i=0; i<cols; i++) {
+            		total_value.add(0.0);
+            	}
+            	rows = 0;
+            }
+            
+            //merge
+            public void iterate(ArrayList<Double> value) {
+            	sum(value);
+            	rows++;
+            }
+            
+            public void merge(Item another) {
+            	sum(another.total_value);
+            	rows += another.rows;
+            }
+            
+            private void sum(ArrayList<Double> value) {
+            	if(total_value == null) {
+            		this.reset(value.size());
+            	}
+            	
+            	int cols = this.total_value.size();
+            	
+            	if(value.size() != cols) {
+            		throw new RuntimeException("Expecting array of size " + cols  + ", but found array of size: " + value.size());
+            	}
+            	
+            	
+            	for(int i=0; i<cols; i++){
+            		double previous = total_value.get(i).doubleValue();
+            		double delta = value.get(i).doubleValue();
+            		total_value.set(i, previous+delta);            		
+            	}
+            }
             
         }
          
@@ -49,7 +91,6 @@ public class ArrayAverageUDAF extends UDAF{
          * Its called before records pertaining to a new group are streamed
          */
         public void init() {
-            LOG.debug("======== init ========");
             item = new Item();          
         }
          
@@ -61,25 +102,14 @@ public class ArrayAverageUDAF extends UDAF{
          * @throws HiveException 
          */
         public boolean iterate(ArrayList<Double> value) throws HiveException{
-            LOG.debug("======== iterate ========");
-            
-            if(item == null) item = new Item();
-            
-            int inputLength = value.size();
-            
-            if(item.cnt == 0){
-            	for(Double d: value){
-            		item.total_value.add(d);
-            	}
-            }
-            else{
-            	for(int i=0; i<inputLength; i++){
-            		Double d = item.total_value.get(i);
-            		item.total_value.set(i, d + value.get(i));
-            	}
-            }
-            item.cnt = item.cnt + 1;
-            return true;
+        	LOG.info("===== ITERATE =====");
+        	LOG.info(ArrayUtils.toString(value));
+        	if(item == null) {
+        		item = new Item();
+        	}        	
+        	item.iterate(value);
+        	LOG.info(ArrayUtils.toString(item.total_value));
+        	return true;
         }
          
         /**
@@ -88,7 +118,13 @@ public class ArrayAverageUDAF extends UDAF{
          * @return
          */
         public List<Double> terminate(){
-            LOG.debug("======== terminate ========");
+        	LOG.info("===== TERMINATE =====");        	
+        	int cols = item.total_value.size();        	
+            for (int i=0; i< cols; i++) {
+            	item.total_value.set(i, item.total_value.get(i)/item.rows);
+            }
+        	LOG.info(ArrayUtils.toString(item.total_value));
+
             return item.total_value;
         }
          
@@ -98,8 +134,7 @@ public class ArrayAverageUDAF extends UDAF{
          * returns partially aggregated results. 
          * @return
          */
-        public Item terminatePartial(){
-            LOG.debug("======== terminatePartial ========");            
+        public Item terminatePartial(){                   
             return item;
         }
          
@@ -112,24 +147,26 @@ public class ArrayAverageUDAF extends UDAF{
          * @throws HiveException 
          */
         public boolean merge(Item another) throws HiveException{
-            LOG.debug("======== merge ========");           
-            
-            if(another == null || another.total_value.size() == 0)  return true;
-            
-            if(item.total_value.size() == 0){
-            	item.total_value = another.total_value;
-            	item.cnt = another.cnt;
-            }
-            else if(item.total_value.size() == another.total_value.size()){
-            	for(int i=0; i<item.total_value.size(); i++){
-            		Double d = item.total_value.get(i);
-            		Double b = another.total_value.get(i);
-            		item.total_value.set(i, d + b);
-            	}
-            	item.cnt += another.cnt;
-            	
-            }
-            
+        	LOG.info("===== MERGE =====");
+        	LOG.info(ArrayUtils.toString(item.total_value));
+        	LOG.info(ArrayUtils.toString(item.rows));
+        	LOG.info(ArrayUtils.toString(another.total_value));
+        	LOG.info(ArrayUtils.toString(another.rows));
+        	
+        	if(another == null || another.total_value == null || another.total_value.size() == 0)  
+        		return true;
+        	
+        	if(item == null || item.total_value == null) {
+        		item = new Item()
+        		
+        	}
+    		else {
+    			item.merge(another); 			
+    		}
+        	LOG.info(ArrayUtils.toString(item.total_value));
+        	LOG.info(ArrayUtils.toString(item.rows));
+        	
+        	
             return true;
         }
     }

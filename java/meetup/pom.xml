@@ -48,5 +48,10 @@
     	<artifactId>hive-pdk</artifactId>
     	<version>0.10.0</version>
     </dependency>
+    <dependency>
+    	<groupId>com.sangupta</groupId>
+    	<artifactId>murmur</artifactId>
+    	<version>1.0.0</version>
+    </dependency>
   </dependencies>
 </project>
