@@ -77,7 +77,7 @@ public class ArrayAverageUDAFTest extends TestCase {
 		//finally grab the final result
 		ArrayList<Double> result = (ArrayList<Double>) finalEval.terminate();
 		
-		assertEquals(12.25, result.get(0));
+		assertEquals(22.0, result.get(0));
 		 
 	}
 }
